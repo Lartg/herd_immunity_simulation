@@ -33,7 +33,16 @@ class Simulation():
     
     return self.herd_immunity
 
-  
+  def simulation_end_check(self):
+    
+    if self.population.total_population == self.population.dead + self.population.immune:
+      return False
+
+    elif self.population.immune >= self.herd_immunity:
+      return False
+    
+    else:
+      return True
 
 
 
@@ -68,60 +77,95 @@ class Simulation():
 
 
   def delta_suseptable(self):
+    #randomize through for loop
     self.population.suseptable += -self.virus.reproduction_rate*self.population.suseptable*self.population.infected
+    self.population.infected += self.virus.reproduction_rate*self.population.suseptable*self.population.infected 
+    
+    pass
 
-  def delta_infected(self):
-    self.population.infected += self.virus.reproduction_rate*self.population.suseptable*self.population.infected  
-    '''- self.population.infected*virus.mortality_rate'''
-
-
+#-----------------------------------------------------------------------------------------------------------
   #add time element to delta recovery in run function
+  # if t % virus recovery time == 0: then call delta_recovered
+#-----------------------------------------------------------------------------------------------------------
   def delta_recovered(self):
     #randomize through for loop
     self.population.recovered += self.population.infected*self.virus.recovery_rate
     self.population.infected -= self.population.infected*self.virus.recovery_rate
-    # if t % virus recovery time == 0: then implement recovery
+    
     pass
 
   def delta_dead(self):
-     #randomize through for loop
+    #randomize through for loop
     self.population.dead += self.population.infected*self.virus.mortality_rate
+    self.population.infected -= self.population.infected*self.virus.mortality_rate
+    
     pass
 
-  def delta_immune(self):
-    # test.immune += test.recovered + test.vaccinated
-    pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  def simulation_end_check(self):
+  def calculate_immune(self):
+    self.population.immune = self.population.recovered + self.population.vaccinated
     
-    if self.population.total_population == self.population.dead + self.population.immune:
-      return False
+    return self.population.immune
 
-    elif self.population.immune >= self.herd_immunity:
-      return False
-    
-    else:
-      return True
+
+#-----------------------------------------------------------------------------------------------------------
+ #multiply all outputs by total population to get stats
+#-----------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
 
   def run(self):
     ''' This method should run the simulation until all requirements for ending
@@ -186,7 +230,3 @@ class Simulation():
     # sim = Simulation(pop_size, vacc_percentage, initial_infected, virus)
 
     # sim.run()
-
-
-
-
