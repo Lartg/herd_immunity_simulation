@@ -5,9 +5,10 @@ class Population():
     self.initial_infected = initial_infected
 
     #percentages of total pop-------------------------------------------
-    self.immune = self.recovered + self.vaccinated
+    
     self.vaccinated = vaccinated/total_population
     self.infected = initial_infected/total_population
     self.recovered = 0/total_population
     self.suseptable = 1 - self.infected - self.vaccinated
     self.dead = 0/total_population
+    self.immune = self.recovered + self.vaccinated

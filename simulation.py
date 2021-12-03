@@ -1,7 +1,7 @@
 import random, sys
 random.seed(42)
 from population import Population
-from logger import Logger
+# from logger import Logger
 from virus import Virus
 
 
@@ -15,14 +15,14 @@ class Simulation():
     self.herd_immunity = None
       
   def create_population(self, total_population, initial_infected, vaccinated):
-
+    
     self.population = Population(total_population, initial_infected, vaccinated)
 
     return self.population
   
-  def create_virus(self, name, reproduction_rate, mortality_rate, recovery_time):
-    
-    self.virus = Virus(name, reproduction_rate, mortality_rate, recovery_time)
+  def create_virus(self, virus_name, reproduction_rate, mortality_rate, recovery_time):
+  
+    self.virus = Virus(virus_name, reproduction_rate, mortality_rate, recovery_time)
     
     return self.virus
 
@@ -78,8 +78,9 @@ class Simulation():
 
   def delta_suseptable(self):
     #randomize through for loop
-    self.population.suseptable += -self.virus.reproduction_rate*self.population.suseptable*self.population.infected
-    self.population.infected += self.virus.reproduction_rate*self.population.suseptable*self.population.infected 
+    change = self.virus.reproduction_rate*self.population.suseptable*self.population.infected
+    self.population.suseptable -= change
+    self.population.infected += change
     
     pass
 
@@ -89,15 +90,20 @@ class Simulation():
 #-----------------------------------------------------------------------------------------------------------
   def delta_recovered(self):
     #randomize through for loop
-    self.population.recovered += self.population.infected*self.virus.recovery_rate
-    self.population.infected -= self.population.infected*self.virus.recovery_rate
+
+    change = self.population.infected*self.virus.recovery_rate
+
+    self.population.infected -= change
+    self.population.recovered += change
+    
     
     pass
 
   def delta_dead(self):
     #randomize through for loop
-    self.population.dead += self.population.infected*self.virus.mortality_rate
-    self.population.infected -= self.population.infected*self.virus.mortality_rate
+    change = self.population.infected*self.virus.mortality_rate
+    self.population.dead += change
+    self.population.infected -= change
     
     pass
 
@@ -168,22 +174,36 @@ class Simulation():
 
 
   def run(self):
-    ''' This method should run the simulation until all requirements for ending
-    the simulation are met.
-    '''
-    # TODO: Finish this method.  To simplify the logic here, use the helper method
-    # _simulation_should_continue() to tell us whether or not we should continue
-    # the simulation and run at least 1 more time_ste 
-    # TODO: Keep track of the number of time steps that have passed.
-    # HINT: You may want to call the logger's log_time_step() method at the end of each time step.
-    # TODO: Set this variable using a helper
-    time_step_counter = 0
+    t = 0
+    print(5)
     should_continue = True  
     while should_continue == True:
-        # TODO: for every iteration of this loop, call self.time_step() to compute another
-        # round of this simulation.
-        print(f'The simulation has ended after {time_step_counter} turns.')
-        pass
+      t+=1
+
+      self.delta_suseptable()
+      
+      self.delta_dead()
+
+      if t % self.virus.recovery_time == 0:
+        self.delta_recovered()
+      #   for person in range(self.population.infected*self.population.total_population):
+          
+
+      self.calculate_immune()
+
+      data = {
+        'suseptable': round(self.population.suseptable*total_population),
+        'infected': round(self.population.infected*total_population),
+        'dead': round(self.population.dead*total_population),
+        'immune': round(self.population.immune*total_population),
+        'time': t
+      }
+
+      print(data)
+      should_continue = self.simulation_end_check()
+      if t >20:
+        should_continue = False
+      pass
 
 
 
@@ -212,21 +232,25 @@ class Simulation():
 
 
 
-# if __name__ == "__main__":
-#     params = sys.argv[1:]
-#     virus_name = str(params[0])
-#     repro_num = float(params[1])
-#     mortality_rate = float(params[2])
+if __name__ == "__main__":
+  #------- get initial data from user in command line -------
 
-#     pop_size = int(params[3])
-#     vacc_percentage = float(params[4])
+  total_population = int(sys.argv[1])
+  initial_infected = int(sys.argv[2])
+  vaccinated = int(sys.argv[3])
+  virus_name = sys.argv[4]
+  reproduction_rate = float(sys.argv[5])
+  mortality_rate = float(sys.argv[6])
+  recovery_time = int(sys.argv[7])
 
-#     if len(params) == 6:
-#         initial_infected = int(params[5])
-#     else:
-#         initial_infected = 1
+  #-------- use data to init run -----------------------------
 
-    # virus = Virus(name, repro_rate, mortality_rate)
-    # sim = Simulation(pop_size, vacc_percentage, initial_infected, virus)
+  simulation = Simulation()
+  simulation.create_population(total_population, initial_infected, vaccinated)
+  simulation.create_virus(virus_name, reproduction_rate, mortality_rate, recovery_time)
+  simulation.calculate_herd_immunity()
 
-    # sim.run()
+  print(simulation.population.__dict__)
+  print(simulation.virus.__dict__)
+
+  simulation.run()
