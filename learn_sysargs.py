@@ -1,6 +1,9 @@
-import sys
+from population import Population
 
-print("This is the name of the script: ", sys.argv[0])
-print("Number of arguments: ", len(sys.argv))
-print("this is", sys.argv[2])
-print("The arguments are: " , str(sys.argv))
+population = Population(100, 1, 0)
+
+def calculate_immune(self):
+      
+      population.immune = population.recovered + population.vaccinated
+      
+      return self.population.immune

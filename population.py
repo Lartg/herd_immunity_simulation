@@ -12,3 +12,4 @@ class Population():
     self.suseptable = 1 - self.infected - self.vaccinated
     self.dead = 0/total_population
     self.immune = self.recovered + self.vaccinated
+    self.alive_population = total_population

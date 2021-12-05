@@ -1,11 +1,7 @@
 import random, sys
-random.seed(42)
 from population import Population
 # from logger import Logger
 from virus import Virus
-
-
-
 
 class Simulation():
   def __init__(self):
@@ -28,208 +24,97 @@ class Simulation():
 
   def calculate_herd_immunity(self):
     
-    R_0 = self.virus.reproduction_rate/self.virus.recovery_rate
+    R_0 = self.virus.reproduction_rate/(self.virus.recovery_rate)
     self.herd_immunity = 1 - (1/R_0)
     
     return self.herd_immunity
 
+  def calculate_immune(self):
+
+    self.population.immune = self.population.recovered + self.population.vaccinated
+      
+    return self.population.immune
+
+  def calcualte_alive(self):
+    self.population.alive_population = self.population.infected + self.population.suseptable + self.population.immune
+
   def simulation_end_check(self):
     
-    if self.population.total_population == self.population.dead + self.population.immune:
+    if self.population.total_population - 5 == (self.population.dead + self.population.immune + self.population.suseptable)*total_population:
+      print('simulation ended because there are no infected')
       return False
 
-    elif self.population.immune >= self.herd_immunity:
-      return False
+    # elif self.population.immune > 0:
+    #   if self.population.immune/self.population.alive_population >= self.herd_immunity:
+    #     print('simulation ended because herd immunity was reached')
+        
+    #     return False
+    #   else:
+    #     return True
     
     else:
       return True
 
+# RATES ---------------------------------------------------------------------------------------------------
 
+  def change(self):
+    change_1 = self.virus.reproduction_rate*self.population.suseptable*self.population.infected
+    change_2 = (self.population.infected*self.virus.recovery_rate)/(0.56*self.virus.recovery_time)
+    change_3 = self.population.infected*self.virus.mortality_rate/(0.44*self.virus.recovery_time)
 
+    if change_1 > self.population.suseptable:
+      change_1 = self.population.suseptable
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  def delta_suseptable(self):
-    #randomize through for loop
-    change = self.virus.reproduction_rate*self.population.suseptable*self.population.infected
-    self.population.suseptable -= change
-    self.population.infected += change
+    for person in range(round(self.population.suseptable*self.population.total_population)):
+      infection = [0,1]
+      person = random.choices(infection, weights = [1-change_1, change_1], k = 1)
+      self.population.suseptable -= person[0]/self.population.total_population
+      self.population.infected += person[0]/self.population.total_population
     
+
+    for person in range(round(self.population.infected*self.population.total_population)):
+      recovery = [0,1]
+      person = random.choices(recovery, weights = [1-change_2, change_2], k = 1)
+      self.population.infected -= person[0]/self.population.total_population
+      self.population.recovered += person[0]/self.population.total_population
+    
+    for person in range(round(self.population.infected*self.population.total_population)):
+      death = [0,1]
+      person = random.choices(death, weights = [1-change_3, change_3], k = 1)
+      self.population.dead += person[0]/self.population.total_population
+      self.population.infected -= person[0]/self.population.total_population
+
     pass
-
-#-----------------------------------------------------------------------------------------------------------
-  #add time element to delta recovery in run function
-  # if t % virus recovery time == 0: then call delta_recovered
-#-----------------------------------------------------------------------------------------------------------
-  def delta_recovered(self):
-    #randomize through for loop
-
-    change = self.population.infected*self.virus.recovery_rate
-
-    self.population.infected -= change
-    self.population.recovered += change
-    
-    
-    pass
-
-  def delta_dead(self):
-    #randomize through for loop
-    change = self.population.infected*self.virus.mortality_rate
-    self.population.dead += change
-    self.population.infected -= change
-    
-    pass
-
-  def calculate_immune(self):
-    self.population.immune = self.population.recovered + self.population.vaccinated
-    
-    return self.population.immune
-
-
-#-----------------------------------------------------------------------------------------------------------
- #multiply all outputs by total population to get stats
-#-----------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
   def run(self):
     t = 0
-    print(5)
     should_continue = True  
     while should_continue == True:
       t+=1
-
-      self.delta_suseptable()
-      
-      self.delta_dead()
-
-      if t % self.virus.recovery_time == 0:
-        self.delta_recovered()
-      #   for person in range(self.population.infected*self.population.total_population):
-          
-
+      self.calcualte_alive()
       self.calculate_immune()
-
       data = {
         'suseptable': round(self.population.suseptable*total_population),
         'infected': round(self.population.infected*total_population),
         'dead': round(self.population.dead*total_population),
         'immune': round(self.population.immune*total_population),
+        'percent immune':round(100*self.population.immune/(self.population.suseptable+self.population.infected+self.population.immune)),
+        'herd immunity': round(100*self.herd_immunity),
         'time': t
       }
-
+      #log here
       print(data)
+      
       should_continue = self.simulation_end_check()
-      if t >20:
+
+      if t > 104:
         should_continue = False
+
+      self.change()
       pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
