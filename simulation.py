@@ -1,3 +1,6 @@
+#python3 simulation.py 10000 2 0 COVID 3 0.016 2
+#run data for covid^
+
 import random, sys
 from population import Population
 from virus import Virus
@@ -79,7 +82,7 @@ class Simulation():
       self.population.recovered += person[0]/self.population.total_population
     
     for person in range(round(self.population.infected*self.population.total_population)):
-      change_3 = self.population.infected*self.virus.mortality_rate/(0.85*self.virus.recovery_time)
+      change_3 = self.population.infected*self.virus.mortality_rate/(0.9*self.virus.recovery_time)
       death = [0,1]
       person = random.choices(death, weights = [1-change_3, change_3], k = 1)
       self.population.dead += person[0]/self.population.total_population
@@ -93,7 +96,6 @@ class Simulation():
       t+=1
       self.calcualte_alive()
       self.calculate_immune()
-      #format as a string
       data = (
         f"---------------- week: {t} ----------------\n"
         f"suseptable: {round(self.population.suseptable*total_population)}\n"
@@ -134,9 +136,15 @@ if __name__ == "__main__":
   f"Initial Infected: {simulation.population.initial_infected}\n"
   f"Vaccinated Individuals: {simulation.population.vaccinated*simulation.population.total_population}\n\n"
   f"Population is infected with {simulation.virus.name}\n"
-  f"{simulation.virus.name} has a reproduction rate of {simulation.virus.reproduction_rate} and a mortality rate of {simulation.virus.mortality_rate}%\n",
+  f"{simulation.virus.name} has a reproduction rate of {simulation.virus.reproduction_rate} and a mortality rate of {simulation.virus.mortality_rate*100}%\n",
   file=open('logger.txt', 'w')
   )
   
 
   simulation.run()
+
+  print("---------To Reach This Point---------\n"
+  f"{simulation.virus.name} killed {round(simulation.population.dead*1000)/10}% of the population, {round(simulation.population.dead/(simulation.population.dead+simulation.population.immune)*1000)/10}% of those who contracted the virus\n"
+  f"{round(simulation.population.suseptable*100)}% of the population never contracted {simulation.virus.name}\n",
+  file=open('logger.txt', 'a')
+  )
