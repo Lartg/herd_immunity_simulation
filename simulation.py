@@ -1,6 +1,5 @@
 import random, sys
 from population import Population
-# from logger import Logger
 from virus import Virus
 
 class Simulation():
@@ -41,16 +40,16 @@ class Simulation():
   def simulation_end_check(self):
     
     if self.population.total_population == (self.population.dead + self.population.immune + self.population.suseptable)*total_population:
-      print('simulation ended because there are no infected')
+      print('simulation ended because there are no infected',file=open('logger.txt', 'a'))
       return False
 
     
     elif self.population.immune/self.population.alive_population >= self.herd_immunity:
-      print('herd immunity has been reached, infected population will dwindle')
-      if self.population.infected < 0.005:
-        print('simulation ended because the infected population has become negligable')
-        return False
-      return True
+      print('herd immunity has been reached, infected population will dwindle',file=open('logger.txt', 'a'))
+      # if self.population.infected < 0.005:
+      #   print('simulation ended because the infected population has become negligable',file=open('logger.txt', 'a'))
+      #   return False
+      return False
       
     
     else:
@@ -61,7 +60,8 @@ class Simulation():
   def change(self):
 
     for person in range(round(self.population.suseptable*self.population.total_population)):
-      change_1 = self.virus.reproduction_rate*self.population.suseptable*self.population.infected
+      change_1 = (self.virus.reproduction_rate*self.population.suseptable*self.population.infected)/10
+      #the quotient represents a time weighting
       if change_1 > self.population.suseptable:
         change_1 = self.population.suseptable
       infection = [0,1]
@@ -71,14 +71,14 @@ class Simulation():
     
 
     for person in range(round(self.population.infected*self.population.total_population)):
-      change_2 = (self.population.infected*self.virus.recovery_rate)/(0.11*self.virus.recovery_time)
+      change_2 = (self.population.infected*self.virus.recovery_rate)/(self.virus.recovery_time)
       recovery = [0,1]
       person = random.choices(recovery, weights = [1-change_2, change_2], k = 1)
       self.population.infected -= person[0]/self.population.total_population
       self.population.recovered += person[0]/self.population.total_population
     
     for person in range(round(self.population.infected*self.population.total_population)):
-      change_3 = self.population.infected*self.virus.mortality_rate/(0.89*self.virus.recovery_time)
+      change_3 = self.population.infected*self.virus.mortality_rate/(0.85*self.virus.recovery_time)
       death = [0,1]
       person = random.choices(death, weights = [1-change_3, change_3], k = 1)
       self.population.dead += person[0]/self.population.total_population
@@ -102,12 +102,16 @@ class Simulation():
         'herd immunity': round(100*self.herd_immunity),
         'time': t
       }
-      #log here
-      print(data)
+      
+      #log data -----------------------------------------------------------------------------------------------
+      print(data, file=open('logger.txt', 'a'))
       
       should_continue = self.simulation_end_check()
 
       self.change()
+      if t==260:
+        #caps at 5 years
+        should_continue = False
       pass
 
 
@@ -129,7 +133,7 @@ if __name__ == "__main__":
   simulation.create_virus(virus_name, reproduction_rate, mortality_rate, recovery_time)
   simulation.calculate_herd_immunity()
 
-  print(simulation.population.__dict__)
-  print(simulation.virus.__dict__)
+  print(simulation.population.__dict__,file=open('logger.txt', 'w'))
+  print(simulation.virus.__dict__,file=open('logger.txt', 'a'))
 
   simulation.run()
