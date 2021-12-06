@@ -61,6 +61,7 @@ class Simulation():
 
     for person in range(round(self.population.suseptable*self.population.total_population)):
       change_1 = (self.virus.reproduction_rate*self.population.suseptable*self.population.infected)/10
+
       #the quotient represents a time weighting
       if change_1 > self.population.suseptable:
         change_1 = self.population.suseptable
@@ -88,30 +89,25 @@ class Simulation():
 
   def run(self):
     t = 0
-    should_continue = True  
-    while should_continue == True:
+    while self.simulation_end_check() == True:
       t+=1
       self.calcualte_alive()
       self.calculate_immune()
-      data = {
-        'suseptable': round(self.population.suseptable*total_population),
-        'infected': round(self.population.infected*total_population),
-        'dead': round(self.population.dead*total_population),
-        'immune': round(self.population.immune*total_population),
-        'percent immune':round(100*self.population.immune/(self.population.suseptable+self.population.infected+self.population.immune)),
-        'herd immunity': round(100*self.herd_immunity),
-        'time': t
-      }
+      #format as a string
+      data = (
+        f"---------------- week: {t} ----------------\n"
+        f"suseptable: {round(self.population.suseptable*total_population)}\n"
+        f"infected: {round(self.population.infected*total_population)}\n"
+        f"dead: {round(self.population.dead*total_population)}\n"
+        f"immune: {round(self.population.immune*total_population)}\n"
+        f"percent immune: ~{round(100*self.population.immune/(self.population.suseptable+self.population.infected+self.population.immune))}% of people alive\n"
+        f"herd immunity: ~{round(100*self.herd_immunity)}% of people alive\n"
+      )
       
       #log data -----------------------------------------------------------------------------------------------
       print(data, file=open('logger.txt', 'a'))
       
-      should_continue = self.simulation_end_check()
-
       self.change()
-      if t==260:
-        #caps at 5 years
-        should_continue = False
       pass
 
 
