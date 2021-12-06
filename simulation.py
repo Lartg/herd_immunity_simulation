@@ -129,7 +129,14 @@ if __name__ == "__main__":
   simulation.create_virus(virus_name, reproduction_rate, mortality_rate, recovery_time)
   simulation.calculate_herd_immunity()
 
-  print(simulation.population.__dict__,file=open('logger.txt', 'w'))
-  print(simulation.virus.__dict__,file=open('logger.txt', 'a'))
+  print("---------------- week: 0 ----------------\n"
+  f"Total Population: {simulation.population.total_population}\n"
+  f"Initial Infected: {simulation.population.initial_infected}\n"
+  f"Vaccinated Individuals: {simulation.population.vaccinated*simulation.population.total_population}\n\n"
+  f"Population is infected with {simulation.virus.name}\n"
+  f"{simulation.virus.name} has a reproduction rate of {simulation.virus.reproduction_rate} and a mortality rate of {simulation.virus.mortality_rate}%\n",
+  file=open('logger.txt', 'w')
+  )
+  
 
   simulation.run()
