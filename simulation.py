@@ -40,17 +40,18 @@ class Simulation():
 
   def simulation_end_check(self):
     
-    if self.population.total_population - 5 == (self.population.dead + self.population.immune + self.population.suseptable)*total_population:
+    if self.population.total_population == (self.population.dead + self.population.immune + self.population.suseptable)*total_population:
       print('simulation ended because there are no infected')
       return False
 
-    # elif self.population.immune > 0:
-    #   if self.population.immune/self.population.alive_population >= self.herd_immunity:
-    #     print('simulation ended because herd immunity was reached')
-        
-    #     return False
-    #   else:
-    #     return True
+    
+    elif self.population.immune/self.population.alive_population >= self.herd_immunity:
+      print('herd immunity has been reached, infected population will dwindle')
+      if self.population.infected < 0.005:
+        print('simulation ended because the infected population has become negligable')
+        return False
+      return True
+      
     
     else:
       return True
@@ -58,14 +59,11 @@ class Simulation():
 # RATES ---------------------------------------------------------------------------------------------------
 
   def change(self):
-    change_1 = self.virus.reproduction_rate*self.population.suseptable*self.population.infected
-    change_2 = (self.population.infected*self.virus.recovery_rate)/(0.56*self.virus.recovery_time)
-    change_3 = self.population.infected*self.virus.mortality_rate/(0.44*self.virus.recovery_time)
-
-    if change_1 > self.population.suseptable:
-      change_1 = self.population.suseptable
 
     for person in range(round(self.population.suseptable*self.population.total_population)):
+      change_1 = self.virus.reproduction_rate*self.population.suseptable*self.population.infected
+      if change_1 > self.population.suseptable:
+        change_1 = self.population.suseptable
       infection = [0,1]
       person = random.choices(infection, weights = [1-change_1, change_1], k = 1)
       self.population.suseptable -= person[0]/self.population.total_population
@@ -73,21 +71,20 @@ class Simulation():
     
 
     for person in range(round(self.population.infected*self.population.total_population)):
+      change_2 = (self.population.infected*self.virus.recovery_rate)/(0.11*self.virus.recovery_time)
       recovery = [0,1]
       person = random.choices(recovery, weights = [1-change_2, change_2], k = 1)
       self.population.infected -= person[0]/self.population.total_population
       self.population.recovered += person[0]/self.population.total_population
     
     for person in range(round(self.population.infected*self.population.total_population)):
+      change_3 = self.population.infected*self.virus.mortality_rate/(0.89*self.virus.recovery_time)
       death = [0,1]
       person = random.choices(death, weights = [1-change_3, change_3], k = 1)
       self.population.dead += person[0]/self.population.total_population
       self.population.infected -= person[0]/self.population.total_population
 
     pass
-
-
-  
 
   def run(self):
     t = 0
@@ -109,9 +106,6 @@ class Simulation():
       print(data)
       
       should_continue = self.simulation_end_check()
-
-      if t > 104:
-        should_continue = False
 
       self.change()
       pass
