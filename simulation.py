@@ -137,6 +137,8 @@ if __name__ == "__main__":
   simulation.create_virus(virus_name, reproduction_rate, mortality_rate, recovery_time)
   simulation.calculate_herd_immunity()
 
+  #-------- initial log ---------------------------------------
+
   print("---------------- week: 0 ----------------\n"
   f"Total Population: {simulation.population.total_population}\n"
   f"Initial Infected: {simulation.population.initial_infected}\n"
@@ -146,12 +148,17 @@ if __name__ == "__main__":
   file=open('logger.txt', 'w')
   )
   
+  #-------- run sim -------------------------------------------
 
   simulation.run()
   
+  #-------- final log -----------------------------------------
+
   print("---------To Reach This Point---------\n"
   f"{simulation.virus.name} killed {round(simulation.population.dead*1000)/10}% of the population, {round(simulation.population.dead/(simulation.population.dead+simulation.population.immune)*1000)/10}% of those who contracted the virus\n"
   f"{round(simulation.population.suseptable*100)}% of the population never contracted {simulation.virus.name}\n",
   file=open('logger.txt', 'a')
   )
+
+  #-------- generate graph ------------------------------------
   graph(data)
