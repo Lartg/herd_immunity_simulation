@@ -81,7 +81,7 @@ class Simulation():
       self.population.recovered += person[0]/self.population.total_population
     
     for person in range(round(self.population.infected*self.population.total_population)):
-      change_3 = self.population.infected*self.virus.mortality_rate/(0.9*self.virus.recovery_time)
+      change_3 = self.population.infected*self.virus.mortality_rate/1.5
       death = [0,1]
       person = random.choices(death, weights = [1-change_3, change_3], k = 1)
       self.population.dead += person[0]/self.population.total_population
@@ -150,9 +150,10 @@ if __name__ == "__main__":
   
 
   simulation.run()
-  graph(data)
+  
   print("---------To Reach This Point---------\n"
   f"{simulation.virus.name} killed {round(simulation.population.dead*1000)/10}% of the population, {round(simulation.population.dead/(simulation.population.dead+simulation.population.immune)*1000)/10}% of those who contracted the virus\n"
   f"{round(simulation.population.suseptable*100)}% of the population never contracted {simulation.virus.name}\n",
   file=open('logger.txt', 'a')
   )
+  graph(data)
