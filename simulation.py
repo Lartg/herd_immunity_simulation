@@ -65,8 +65,6 @@ class Simulation():
 
     for person in range(round(self.population.suseptable*self.population.total_population)):
       change_1 = (self.virus.reproduction_rate*self.population.suseptable*self.population.infected)/10
-      #the quotient represents a time weighting
-
       infection = [0,1]
       person = random.choices(infection, weights = [1-change_1, change_1], k = 1)
       self.population.suseptable -= person[0]/self.population.total_population
