@@ -4,6 +4,9 @@
 import random, sys
 from population import Population
 from virus import Virus
+from graph import graph
+
+data = []
 
 class Simulation():
   def __init__(self):
@@ -49,9 +52,7 @@ class Simulation():
     
     elif self.population.immune/self.population.alive_population >= self.herd_immunity:
       print('herd immunity has been reached, infected population will dwindle',file=open('logger.txt', 'a'))
-      # if self.population.infected < 0.005:
-      #   print('simulation ended because the infected population has become negligable',file=open('logger.txt', 'a'))
-      #   return False
+      
       return False
       
     
@@ -64,10 +65,8 @@ class Simulation():
 
     for person in range(round(self.population.suseptable*self.population.total_population)):
       change_1 = (self.virus.reproduction_rate*self.population.suseptable*self.population.infected)/10
-
       #the quotient represents a time weighting
-      if change_1 > self.population.suseptable:
-        change_1 = self.population.suseptable
+
       infection = [0,1]
       person = random.choices(infection, weights = [1-change_1, change_1], k = 1)
       self.population.suseptable -= person[0]/self.population.total_population
@@ -96,7 +95,7 @@ class Simulation():
       t+=1
       self.calcualte_alive()
       self.calculate_immune()
-      data = (
+      log = (
         f"---------------- week: {t} ----------------\n"
         f"suseptable: {round(self.population.suseptable*total_population)}\n"
         f"infected: {round(self.population.infected*total_population)}\n"
@@ -105,9 +104,18 @@ class Simulation():
         f"percent immune: ~{round(100*self.population.immune/(self.population.suseptable+self.population.infected+self.population.immune))}% of people alive\n"
         f"herd immunity: ~{round(100*self.herd_immunity)}% of people alive\n"
       )
+      datum = {
+        'weeks': t,
+        'suseptable': round(self.population.suseptable*total_population),
+        'infected': round(self.population.infected*total_population),
+        'dead': round(self.population.dead*total_population),
+        'immune': round(self.population.immune*total_population)
+      }
       
+      data.append(datum)
+
       #log data -----------------------------------------------------------------------------------------------
-      print(data, file=open('logger.txt', 'a'))
+      print(log, file=open('logger.txt', 'a'))
       
       self.change()
       pass
@@ -142,7 +150,7 @@ if __name__ == "__main__":
   
 
   simulation.run()
-
+  graph(data)
   print("---------To Reach This Point---------\n"
   f"{simulation.virus.name} killed {round(simulation.population.dead*1000)/10}% of the population, {round(simulation.population.dead/(simulation.population.dead+simulation.population.immune)*1000)/10}% of those who contracted the virus\n"
   f"{round(simulation.population.suseptable*100)}% of the population never contracted {simulation.virus.name}\n",
